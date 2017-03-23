@@ -2,8 +2,11 @@ package com.example.sxl.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.ViewGroup;
+
+import com.example.sxl.utils.CustomGestureDetector;
 
 /**
  * Created by LJDY490 on 2017/3/22.
@@ -66,19 +69,47 @@ public class Game2048Layout extends ViewGroup {
     }
 
     public Game2048Layout(Context context) {
-        super(context);
+        this(context,null);
     }
 
     public Game2048Layout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs,0);
     }
 
-    public Game2048Layout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    public Game2048Layout(Context context, AttributeSet attrs, int defStyleAtt) {
+        super(context, attrs, defStyleAtt);
+
+        mMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,mMargin,getResources().getDisplayMetrics());
+        mPadding = min(getPaddingLeft(),getPaddingTop(),getPaddingRight(),getPaddingBottom());
+        mGestureDetector = new GestureDetector(context,new CustomGestureDetector());
+    }
+
+    /**
+     * 根据用户运动,整体进行移动跟合并
+     */
+    private void action(ACTION action){
+
     }
 
     @Override
     protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
 
+    }
+
+    /**
+     * 得到多值的最小值
+     * @param params
+     * @return
+     */
+    private int min(int... params){
+        int min = params[0];
+
+        for(int param: params){
+            if(min > param){
+                min = param;
+            }
+        }
+
+        return min;
     }
 }
