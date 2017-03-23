@@ -45,6 +45,26 @@ public class Game2048Layout extends ViewGroup {
      */
     private int mScore;
 
+    /**
+     *运动方向的枚举
+     */
+    private enum ACTION{
+        LEFT,RIGHT,UP,DOWN
+    }
+
+    public interface OnGame2048Listener{
+
+        void onChangeScore(int score);
+
+        void onGameOver();
+    }
+
+    private OnGame2048Listener mOnGame2048Listemer;
+
+    private void setOnGame2048Listener(OnGame2048Listener onGame2048Listener){
+        this.mOnGame2048Listemer = onGame2048Listener;
+    }
+
     public Game2048Layout(Context context) {
         super(context);
     }
