@@ -2,6 +2,7 @@ package com.example.sxl.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -184,7 +185,50 @@ public class Game2048Layout extends RelativeLayout {
             return false;
         }
 
+        for(int i = 0; i < mColumn ; i++){
+            for(int j = 0 ; j < mColumn; j++){
+                int index = i * mColumn + j;
 
+                //当前的item
+                Game2048Item item = mGame2048Items[index];
+
+                // 右边
+                if ((index + 1) % mColumn != 0)
+                {
+                    Log.e("TAG", "RIGHT");
+                    // 右边的Item
+                    Game2048Item itemRight = mGame2048Items[index + 1];
+                    if (item.getNumber() == itemRight.getNumber())
+                        return false;
+                }
+                // 下边
+                if ((index + mColumn) < mColumn * mColumn)
+                {
+                    Log.e("TAG", "DOWN");
+                    Game2048Item itemBottom = mGame2048Items[index + mColumn];
+                    if (item.getNumber() == itemBottom.getNumber())
+                        return false;
+                }
+                // 左边
+                if (index % mColumn != 0)
+                {
+                    Log.e("TAG", "LEFT");
+                    Game2048Item itemLeft = mGame2048Items[index - 1];
+                    if (itemLeft.getNumber() == item.getNumber())
+                        return false;
+                }
+                // 上边
+                if (index + 1 > mColumn)
+                {
+                    Log.e("TAG", "UP");
+                    Game2048Item itemTop = mGame2048Items[index - mColumn];
+                    if (item.getNumber() == itemTop.getNumber())
+                        return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
