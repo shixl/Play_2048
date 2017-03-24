@@ -4,15 +4,18 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
-import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.example.sxl.utils.CustomGestureDetector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by LJDY490 on 2017/3/22.
  */
 
-public class Game2048Layout extends ViewGroup {
+public class Game2048Layout extends RelativeLayout {
 
     /**
      * 设置item的数量n*n 默认为4
@@ -88,12 +91,41 @@ public class Game2048Layout extends ViewGroup {
      * 根据用户运动,整体进行移动跟合并
      */
     private void action(ACTION action){
+        //行|列
+        for(int i = 0 ;i < mColumn ; i++){
+            List<Game2048Item> row = new ArrayList<>();
+            // 行|列
+            //记录不为0的数字
+            for(int j = 0; j < mColumn; j++){
 
+            }
+        }
     }
 
-    @Override
-    protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
-
+    /**
+     * 根据Action和i,j得到下标
+     * @param action
+     * @param i
+     * @param j
+     * @return
+     */
+    private int getIndexByAction(ACTION action ,int i,int j){
+        int index = -1;
+        switch (action){
+            case LEFT:
+                index = i * mColumn + j;
+                break;
+            case RIGHT:
+                index = i * mColumn + mColumn - j -1;
+                break;
+            case UP:
+                index = i + j * mColumn;
+                break;
+            case DOWN:
+                index = i + (mColumn - 1 -j)*mColumn;
+                break;
+        }
+        return index;
     }
 
     /**
