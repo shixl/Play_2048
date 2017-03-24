@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
 import com.example.sxl.utils.CustomGestureDetector;
@@ -52,13 +53,13 @@ public class Game2048Layout extends RelativeLayout {
     private int mScore;
 
     /**
-     *运动方向的枚举
+     * 运动方向的枚举
      */
-    private enum ACTION{
-        LEFT,RIGHT,UP,DOWN
+    private enum ACTION {
+        LEFT, RIGHT, UP, DOWN
     }
 
-    public interface OnGame2048Listener{
+    public interface OnGame2048Listener {
 
         void onChangeScore(int score);
 
@@ -67,91 +68,183 @@ public class Game2048Layout extends RelativeLayout {
 
     private OnGame2048Listener mOnGame2048Listemer;
 
-    private void setOnGame2048Listener(OnGame2048Listener onGame2048Listener){
+    private void setOnGame2048Listener(OnGame2048Listener onGame2048Listener) {
         this.mOnGame2048Listemer = onGame2048Listener;
     }
 
     public Game2048Layout(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public Game2048Layout(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public Game2048Layout(Context context, AttributeSet attrs, int defStyleAtt) {
         super(context, attrs, defStyleAtt);
 
-        mMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,mMargin,getResources().getDisplayMetrics());
-        mPadding = min(getPaddingLeft(),getPaddingTop(),getPaddingRight(),getPaddingBottom());
-        mGestureDetector = new GestureDetector(context,new CustomGestureDetector());
+        mMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mMargin, getResources().getDisplayMetrics());
+        mPadding = min(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        mGestureDetector = new GestureDetector(context, new CustomGestureDetector());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     /**
      * 根据用户运动,整体进行移动跟合并
      */
-    private void action(ACTION action){
+    private void action(ACTION action) {
         //行|列
-        for(int i = 0 ;i < mColumn ; i++){
+        for (int i = 0; i < mColumn; i++) {
             List<Game2048Item> row = new ArrayList<>();
             // 行|列
             //记录不为0的数字
-            for(int j = 0; j < mColumn; j++){
+            for (int j = 0; j < mColumn; j++) {
                 //得到下标
                 int index = getIndexByAction(action, i, j);
                 Game2048Item item = mGame2048Items[index];
                 //记录不为0的数字
-                if (item.getNumber() != 0){
+                if (item.getNumber() != 0) {
                     row.add(item);
                 }
             }
 
             //判断是否移动
-            for (int j = 0 ; j < mColumn && j < row.size(); j++){
+            for (int j = 0; j < mColumn && j < row.size(); j++) {
                 int index = getIndexByAction(action, i, j);
                 Game2048Item item = mGame2048Items[index];
-                if(item.getNumber() != row.get(j).getNumber()){
+
+                if (item.getNumber() != row.get(j).getNumber()) {
                     isMoveHappen = true;
                 }
             }
 
+            //合并相同的
+            mergeItem(row);
+
+            //设置合并后的值
+            for (int j = 0; j < mColumn; j++) {
+                int index = getIndexByAction(action, i, j);
+
+                if (row.size() > j) {
+                    mGame2048Items[index].setNumber(row.get(j).getNumber());
+                } else {
+                    mGame2048Items[index].setNumber(0);
+                }
+            }
+
+            //生成数字
+            generateNum();
 
         }
+    }
+
+    /**
+     * 产生一个数字
+     */
+    private void generateNum() {
+
+    }
+
+    /**
+     * 是否填满数字
+     *
+     * @return
+     */
+    private boolean isFull()
+    {
+        // 检测是否所有位置都有数字
+        for (int i = 0; i < mGame2048Items.length; i++)
+        {
+            if (mGame2048Items[i].getNumber() == 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 检测当前所有的位置都有数字，且相邻的没有相同的数字
+     *
+     * @return
+     */
+    private boolean checkOver(){
+        //检测是否所有位置都有数字
+        if(!isFull()){
+            return false;
+        }
+
+
     }
 
     /**
      * 合并相同的item
+     *
      * @param row
      */
-    private void mergeItem(List<Game2048Item> row){
-        if(row.size() < 2){
+    private void mergeItem(List<Game2048Item> row) {
+        if (row.size() < 2) {
             return;
         }
 
+        for (int j = 0; j < row.size() - 1; j++) {
+            Game2048Item item1 = row.get(j);
+            Game2048Item item2 = row.get(j + 1);
+            if (item1.getNumber() == item2.getNumber()) {
+                isMergeHappen = true;
 
+                int val = item1.getNumber() + item2.getNumber();
+                item1.setNumber(val);
+
+                //加分
+                mScore += val;
+                if (mOnGame2048Listemer != null) {
+                    mOnGame2048Listemer.onChangeScore(mScore);
+                }
+
+                //向前移动
+                for (int k = j + 1; k < row.size() - 1; k++) {
+                    row.get(k).setNumber(row.get(k + 1).getNumber());
+                }
+
+                row.get(row.size() - 1).setNumber(0);
+                return;
+            }
+        }
     }
 
     /**
      * 根据Action和i,j得到下标
+     *
      * @param action
      * @param i
      * @param j
      * @return
      */
-    private int getIndexByAction(ACTION action ,int i,int j){
+    private int getIndexByAction(ACTION action, int i, int j) {
         int index = -1;
-        switch (action){
+        switch (action) {
             case LEFT:
                 index = i * mColumn + j;
                 break;
             case RIGHT:
-                index = i * mColumn + mColumn - j -1;
+                index = i * mColumn + mColumn - j - 1;
                 break;
             case UP:
                 index = i + j * mColumn;
                 break;
             case DOWN:
-                index = i + (mColumn - 1 -j)*mColumn;
+                index = i + (mColumn - 1 - j) * mColumn;
                 break;
         }
         return index;
@@ -159,14 +252,15 @@ public class Game2048Layout extends RelativeLayout {
 
     /**
      * 得到多值的最小值
+     *
      * @param params
      * @return
      */
-    private int min(int... params){
+    private int min(int... params) {
         int min = params[0];
 
-        for(int param: params){
-            if(min > param){
+        for (int param : params) {
+            if (min > param) {
                 min = param;
             }
         }
