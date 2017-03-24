@@ -97,9 +97,38 @@ public class Game2048Layout extends RelativeLayout {
             // 行|列
             //记录不为0的数字
             for(int j = 0; j < mColumn; j++){
-
+                //得到下标
+                int index = getIndexByAction(action, i, j);
+                Game2048Item item = mGame2048Items[index];
+                //记录不为0的数字
+                if (item.getNumber() != 0){
+                    row.add(item);
+                }
             }
+
+            //判断是否移动
+            for (int j = 0 ; j < mColumn && j < row.size(); j++){
+                int index = getIndexByAction(action, i, j);
+                Game2048Item item = mGame2048Items[index];
+                if(item.getNumber() != row.get(j).getNumber()){
+                    isMoveHappen = true;
+                }
+            }
+
+
         }
+    }
+
+    /**
+     * 合并相同的item
+     * @param row
+     */
+    private void mergeItem(List<Game2048Item> row){
+        if(row.size() < 2){
+            return;
+        }
+
+
     }
 
     /**
